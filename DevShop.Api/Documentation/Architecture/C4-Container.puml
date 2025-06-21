@@ -1,0 +1,23 @@
+@startuml DevShop API - C4 Container Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title DevShop API - Container Diagram (C4 Model Level 1)
+
+Person(client, "Cliente", "Usuário da aplicação que consome a API")
+
+System_Boundary(devshop_system, "DevShop E-commerce System") {
+    Container(web_api, "DevShop API", "ASP.NET Core 9.0", "Fornece funcionalidades de e-commerce via REST API")
+    Container(db, "SQLite Database", "SQLite", "Armazena dados de produtos, clientes e pedidos")
+}
+
+System_Ext(swagger, "Swagger UI", "Documentação e teste da API")
+
+Rel(client, web_api, "Usa", "HTTP/REST")
+Rel(web_api, db, "Lê e escreve dados", "Entity Framework Core")
+Rel(client, swagger, "Acessa documentação", "HTTP")
+Rel(swagger, web_api, "Testa endpoints", "HTTP/REST")
+
+@enduml 

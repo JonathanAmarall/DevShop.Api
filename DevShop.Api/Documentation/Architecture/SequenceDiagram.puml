@@ -1,0 +1,110 @@
+@startuml DevShop API - Sequence Diagram - Create Order
+
+!theme plain
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+
+title DevShop API - Sequence Diagram: Create Order
+
+actor Client
+participant "Orders\nController" as OrdersController
+participant "Customer\nRepository" as CustomerRepo
+participant "Product\nRepository" as ProductRepo
+participant "Order\nRepository" as OrderRepo
+participant "AutoMapper" as Mapper
+participant "DevShop\nDbContext" as DbContext
+database "SQLite\nDatabase" as DB
+
+Client -> OrdersController: POST /api/orders\nCreateOrderView
+activate OrdersController
+
+OrdersController -> CustomerRepo: GetByIdAsync(customerId)
+activate CustomerRepo
+CustomerRepo -> DbContext: FindAsync(customerId)
+activate DbContext
+DbContext -> DB: SELECT * FROM Customers WHERE Id = @customerId
+activate DB
+DB --> DbContext: Customer data
+deactivate DB
+DbContext --> CustomerRepo: Customer entity
+deactivate DbContext
+CustomerRepo --> OrdersController: Customer (or null)
+deactivate CustomerRepo
+
+alt Customer not found
+    OrdersController --> Client: 400 Bad Request\n"Cliente não encontrado"
+    deactivate OrdersController
+else Customer found
+    OrdersController -> Mapper: Map<Order>(createOrderView)
+    activate Mapper
+    Mapper --> OrdersController: Order entity
+    deactivate Mapper
+    
+    loop For each item in createOrderView.Items
+        OrdersController -> ProductRepo: GetByIdAsync(item.ProductId)
+        activate ProductRepo
+        ProductRepo -> DbContext: FindAsync(productId)
+        activate DbContext
+        DbContext -> DB: SELECT * FROM Products WHERE Id = @productId
+        activate DB
+        DB --> DbContext: Product data
+        deactivate DB
+        DbContext --> ProductRepo: Product entity
+        deactivate DbContext
+        ProductRepo --> OrdersController: Product (or null)
+        deactivate ProductRepo
+        
+        alt Product not found
+            OrdersController --> Client: 400 Bad Request\n"Produto com ID {productId} não encontrado"
+            deactivate OrdersController
+        else Product found
+            OrdersController -> Mapper: Map<OrderItem>(itemView, context)
+            activate Mapper
+            Mapper --> OrdersController: OrderItem entity
+            deactivate Mapper
+            
+            OrdersController -> OrdersController: order.AddItem(orderItem)
+        end
+    end
+    
+    OrdersController -> OrderRepo: AddAsync(order)
+    activate OrderRepo
+    OrderRepo -> DbContext: Add(order)
+    activate DbContext
+    DbContext -> DB: INSERT INTO Orders (...)
+    activate DB
+    DB --> DbContext: Order created
+    deactivate DB
+    DbContext -> DbContext: SaveChangesAsync()
+    DbContext -> DB: INSERT INTO OrderItems (...)
+    activate DB
+    DB --> DbContext: OrderItems created
+    deactivate DB
+    DbContext --> OrderRepo: Order entity
+    deactivate DbContext
+    OrderRepo --> OrdersController: Created order
+    deactivate OrderRepo
+    
+    OrdersController -> OrderRepo: GetWithDetailsAsync(orderId)
+    activate OrderRepo
+    OrderRepo -> DbContext: Include(Customer).Include(Items).ThenInclude(Product)
+    activate DbContext
+    DbContext -> DB: SELECT * FROM Orders o\nLEFT JOIN Customers c ON o.CustomerId = c.Id\nLEFT JOIN OrderItems oi ON o.Id = oi.OrderId\nLEFT JOIN Products p ON oi.ProductId = p.Id\nWHERE o.Id = @orderId
+    activate DB
+    DB --> DbContext: Order with details
+    deactivate DB
+    DbContext --> OrderRepo: Order with relationships
+    deactivate DbContext
+    OrderRepo --> OrdersController: Order with details
+    deactivate OrderRepo
+    
+    OrdersController -> Mapper: Map<OrderView>(orderWithDetails)
+    activate Mapper
+    Mapper --> OrdersController: OrderView
+    deactivate Mapper
+    
+    OrdersController --> Client: 201 Created\nOrderView
+    deactivate OrdersController
+end
+
+@enduml 

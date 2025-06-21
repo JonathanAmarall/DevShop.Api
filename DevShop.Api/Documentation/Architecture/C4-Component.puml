@@ -1,0 +1,69 @@
+@startuml DevShop API - C4 Component Diagram
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title DevShop API - Component Diagram (C4 Model Level 2)
+
+Person(client, "Cliente", "Usuário da aplicação que consome a API")
+
+Container_Boundary(web_api, "DevShop API") {
+    Component(products_controller, "Products Controller", "ASP.NET Core Controller", "Gerencia operações de produtos")
+    Component(customers_controller, "Customers Controller", "ASP.NET Core Controller", "Gerencia operações de clientes")
+    Component(orders_controller, "Orders Controller", "ASP.NET Core Controller", "Gerencia operações de pedidos")
+    
+    Component(product_repo, "Product Repository", "Repository Pattern", "Acesso a dados de produtos")
+    Component(customer_repo, "Customer Repository", "Repository Pattern", "Acesso a dados de clientes")
+    Component(order_repo, "Order Repository", "Repository Pattern", "Acesso a dados de pedidos")
+    
+    Component(db_context, "DevShop DbContext", "Entity Framework Core", "Contexto do banco de dados")
+    Component(auto_mapper, "AutoMapper", "Object Mapping", "Mapeamento entre entidades e Views")
+    
+    Component(product_view, "Product Views", "DTOs", "Views para produtos")
+    Component(customer_view, "Customer Views", "DTOs", "Views para clientes")
+    Component(order_view, "Order Views", "DTOs", "Views para pedidos")
+}
+
+Container(db, "SQLite Database", "SQLite", "Armazena dados de produtos, clientes e pedidos")
+
+System_Ext(swagger, "Swagger UI", "Documentação e teste da API")
+
+' Relacionamentos externos
+Rel(client, products_controller, "HTTP GET/POST/PUT/DELETE", "REST API")
+Rel(client, customers_controller, "HTTP GET/POST/PUT/DELETE", "REST API")
+Rel(client, orders_controller, "HTTP GET/POST/PUT/DELETE", "REST API")
+Rel(client, swagger, "Acessa documentação", "HTTP")
+Rel(swagger, products_controller, "Testa endpoints", "HTTP/REST")
+Rel(swagger, customers_controller, "Testa endpoints", "HTTP/REST")
+Rel(swagger, orders_controller, "Testa endpoints", "HTTP/REST")
+
+' Relacionamentos internos - Controllers
+Rel(products_controller, product_repo, "Usa", "Dependency Injection")
+Rel(products_controller, auto_mapper, "Usa", "Dependency Injection")
+Rel(products_controller, product_view, "Retorna", "Views")
+
+Rel(customers_controller, customer_repo, "Usa", "Dependency Injection")
+Rel(customers_controller, auto_mapper, "Usa", "Dependency Injection")
+Rel(customers_controller, customer_view, "Retorna", "Views")
+
+Rel(orders_controller, order_repo, "Usa", "Dependency Injection")
+Rel(orders_controller, customer_repo, "Usa", "Dependency Injection")
+Rel(orders_controller, product_repo, "Usa", "Dependency Injection")
+Rel(orders_controller, auto_mapper, "Usa", "Dependency Injection")
+Rel(orders_controller, order_view, "Retorna", "Views")
+
+' Relacionamentos - Repositórios
+Rel(product_repo, db_context, "Usa", "Entity Framework")
+Rel(customer_repo, db_context, "Usa", "Entity Framework")
+Rel(order_repo, db_context, "Usa", "Entity Framework")
+
+' Relacionamentos - Data Context
+Rel(db_context, db, "Lê e escreve", "SQL")
+
+' Relacionamentos - AutoMapper
+Rel(auto_mapper, product_view, "Mapeia", "Entidades ↔ Views")
+Rel(auto_mapper, customer_view, "Mapeia", "Entidades ↔ Views")
+Rel(auto_mapper, order_view, "Mapeia", "Entidades ↔ Views")
+
+@enduml 

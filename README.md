@@ -2,6 +2,47 @@
 
 API de e-commerce desenvolvida com ASP.NET Core 9.0 e Entity Framework Core com SQLite.
 
+## 📊 Diagramas de Arquitetura
+
+A documentação de arquitetura está disponível em [`Documentation/Architecture/`](DevShop.Api/Documentation/Architecture/):
+
+### Diagramas Disponíveis
+
+#### 1. **Diagrama de Classes UML** 
+- **Arquivo**: [`ClassDiagram.puml`](DevShop.Api/Documentation/Architecture/ClassDiagram.puml) / [`ClassDiagram.md`](DevShop.Api/Documentation/Architecture/ClassDiagram.md)
+- **Descrição**: Mostra as entidades, Views, Repositórios e suas relações
+- **Nível**: Detalhado - Classes e métodos
+
+#### 2. **Diagrama C4 Container (Nível 1)**
+- **Arquivo**: [`C4-Container.puml`](DevShop.Api/Documentation/Architecture/C4-Container.puml) / [`C4-Container.md`](DevShop.Api/Documentation/Architecture/C4-Container.md)
+- **Descrição**: Visão geral do sistema e suas dependências
+- **Nível**: Alto - Containers e tecnologias
+
+#### 3. **Diagrama C4 Component (Nível 2)**
+- **Arquivo**: [`C4-Component.puml`](DevShop.Api/Documentation/Architecture/C4-Component.puml) / [`C4-Component.md`](DevShop.Api/Documentation/Architecture/C4-Component.md)
+- **Descrição**: Mostra os componentes principais da aplicação
+- **Nível**: Médio - Componentes e suas responsabilidades
+
+#### 4. **Diagrama de Sequência**
+- **Arquivo**: [`SequenceDiagram.puml`](DevShop.Api/Documentation/Architecture/SequenceDiagram.puml) / [`SequenceDiagram.md`](DevShop.Api/Documentation/Architecture/SequenceDiagram.md)
+- **Descrição**: Fluxo de criação de um pedido
+- **Nível**: Detalhado - Interações entre componentes
+
+### Como Visualizar
+
+#### PlantUML
+1. Instale uma extensão PlantUML no seu editor (VS Code, IntelliJ, etc.)
+2. Abra qualquer arquivo `.puml`
+3. Use `Alt+Shift+D` (VS Code) para visualizar
+
+#### PlantUML Online
+1. Acesse: https://www.plantuml.com/plantuml/uml/
+2. Cole o conteúdo do arquivo `.puml`
+3. O diagrama será gerado automaticamente
+
+#### Mermaid (GitHub)
+Os diagramas também estão disponíveis em formato Mermaid para visualização direta no GitHub nos arquivos `.md`.
+
 ## Configuração do Banco de Dados
 
 O projeto está configurado para usar SQLite como banco de dados. O arquivo do banco será criado automaticamente na primeira execução.
@@ -218,3 +259,4 @@ GET /api/orders/status/Pending
 #### Pedidos por período
 ```
 GET /api/orders/date-range?startDate=2024-01-01&endDate=2024-12-31
+```

@@ -1,0 +1,355 @@
+@startuml DevShop API - Class Diagram
+
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName Arial
+
+' Entidades de Domínio
+package "Models (Domain Entities)" {
+    abstract class Entity {
+        +Id: string
+        +CreateOnUtc: DateTime
+        +UpdateOnUtc: DateTime?
+        +Entity()
+    }
+
+    class Customer {
+        +FullName: string
+        +PhoneNumber: string
+        +Address: string
+        +Orders: ICollection<Order>
+        +Customer(fullName, phoneNumber, address)
+    }
+
+    class Product {
+        +Name: string
+        +Description: string
+        +Price: decimal
+        +Quantity: long
+        +Code: string
+        +Product(name, description, price, quantity, code)
+    }
+
+    class Order {
+        +CustomerId: string
+        +OrderDateOnUtc: DateTime
+        +TotalAmount: decimal
+        +Status: OrderStatus
+        +Customer: Customer
+        +Items: ICollection<OrderItem>
+        +Order(customerId, totalAmount)
+        +AddItem(item: OrderItem)
+    }
+
+    class OrderItem {
+        +OrderId: string
+        +ProductId: string
+        +Quantity: int
+        +UnitPrice: decimal
+        +Product: Product
+        +Order: Order
+        +OrderItem(orderId, productId, quantity, unitPrice)
+    }
+
+    enum OrderStatus {
+        Pending
+        Paid
+        Shipped
+        Delivered
+        Cancelled
+    }
+}
+
+' Views (DTOs)
+package "Views (Data Transfer Objects)" {
+    class ProductView {
+        +Id: string
+        +Name: string
+        +Description: string
+        +Price: decimal
+        +Quantity: long
+        +Code: string
+        +CreateOnUtc: DateTime
+        +UpdateOnUtc: DateTime?
+    }
+
+    class CreateProductView {
+        +Name: string
+        +Description: string
+        +Price: decimal
+        +Quantity: long
+        +Code: string
+    }
+
+    class UpdateProductView {
+        +Name: string
+        +Description: string
+        +Price: decimal
+        +Quantity: long
+        +Code: string
+    }
+
+    class CustomerView {
+        +Id: string
+        +FullName: string
+        +PhoneNumber: string
+        +Address: string
+        +CreateOnUtc: DateTime
+        +UpdateOnUtc: DateTime?
+    }
+
+    class CreateCustomerView {
+        +FullName: string
+        +PhoneNumber: string
+        +Address: string
+    }
+
+    class UpdateCustomerView {
+        +FullName: string
+        +PhoneNumber: string
+        +Address: string
+    }
+
+    class OrderView {
+        +Id: string
+        +CustomerId: string
+        +OrderDateOnUtc: DateTime
+        +TotalAmount: decimal
+        +Status: OrderStatus
+        +CreateOnUtc: DateTime
+        +UpdateOnUtc: DateTime?
+        +Customer: CustomerView
+        +Items: List<OrderItemView>
+    }
+
+    class CreateOrderView {
+        +CustomerId: string
+        +TotalAmount: decimal
+        +Items: List<CreateOrderItemView>
+    }
+
+    class UpdateOrderView {
+        +TotalAmount: decimal
+        +Status: OrderStatus
+    }
+
+    class OrderItemView {
+        +Id: string
+        +OrderId: string
+        +ProductId: string
+        +Quantity: int
+        +UnitPrice: decimal
+        +CreateOnUtc: DateTime
+        +UpdateOnUtc: DateTime?
+        +Product: ProductView
+    }
+
+    class CreateOrderItemView {
+        +ProductId: string
+        +Quantity: int
+        +UnitPrice: decimal
+    }
+
+    class UpdateOrderItemView {
+        +Quantity: int
+        +UnitPrice: decimal
+    }
+}
+
+' Repositórios
+package "Repositories" {
+    interface IRepository<T> {
+        +GetAllAsync(): Task<IEnumerable<T>>
+        +GetByIdAsync(id: string): Task<T?>
+        +FindAsync(predicate): Task<IEnumerable<T>>
+        +FirstOrDefaultAsync(predicate): Task<T?>
+        +AddAsync(entity: T): Task<T>
+        +UpdateAsync(entity: T): Task
+        +DeleteAsync(entity: T): Task
+        +ExistsAsync(id: string): Task<bool>
+        +ExistsAsync(predicate): Task<bool>
+    }
+
+    class Repository<T> {
+        -_context: DevShopDbContext
+        -_dbSet: DbSet<T>
+        +Repository(context: DevShopDbContext)
+        +GetAllAsync(): Task<IEnumerable<T>>
+        +GetByIdAsync(id: string): Task<T?>
+        +FindAsync(predicate): Task<IEnumerable<T>>
+        +FirstOrDefaultAsync(predicate): Task<T?>
+        +AddAsync(entity: T): Task<T>
+        +UpdateAsync(entity: T): Task
+        +DeleteAsync(entity: T): Task
+        +ExistsAsync(id: string): Task<bool>
+        +ExistsAsync(predicate): Task<bool>
+    }
+
+    interface IProductRepository {
+        +GetByCodeAsync(code: string): Task<Product?>
+        +GetByNameAsync(name: string): Task<Product?>
+        +GetByPriceRangeAsync(minPrice, maxPrice): Task<IEnumerable<Product>>
+        +GetLowStockAsync(threshold: long): Task<IEnumerable<Product>>
+    }
+
+    class ProductRepository {
+        +ProductRepository(context: DevShopDbContext)
+        +GetByCodeAsync(code: string): Task<Product?>
+        +GetByNameAsync(name: string): Task<Product?>
+        +GetByPriceRangeAsync(minPrice, maxPrice): Task<IEnumerable<Product>>
+        +GetLowStockAsync(threshold: long): Task<IEnumerable<Product>>
+    }
+
+    interface ICustomerRepository {
+        +GetWithOrdersAsync(id: string): Task<Customer?>
+        +GetByPhoneNumberAsync(phoneNumber: string): Task<IEnumerable<Customer>>
+        +GetByAddressAsync(address: string): Task<IEnumerable<Customer>>
+    }
+
+    class CustomerRepository {
+        +CustomerRepository(context: DevShopDbContext)
+        +GetWithOrdersAsync(id: string): Task<Customer?>
+        +GetByPhoneNumberAsync(phoneNumber: string): Task<IEnumerable<Customer>>
+        +GetByAddressAsync(address: string): Task<IEnumerable<Customer>>
+    }
+
+    interface IOrderRepository {
+        +GetWithDetailsAsync(id: string): Task<Order?>
+        +GetAllWithDetailsAsync(): Task<IEnumerable<Order>>
+        +GetByCustomerIdAsync(customerId: string): Task<IEnumerable<Order>>
+        +GetByStatusAsync(status: OrderStatus): Task<IEnumerable<Order>>
+        +GetByDateRangeAsync(startDate, endDate): Task<IEnumerable<Order>>
+    }
+
+    class OrderRepository {
+        +OrderRepository(context: DevShopDbContext)
+        +GetWithDetailsAsync(id: string): Task<Order?>
+        +GetAllWithDetailsAsync(): Task<IEnumerable<Order>>
+        +GetByCustomerIdAsync(customerId: string): Task<IEnumerable<Order>>
+        +GetByStatusAsync(status: OrderStatus): Task<IEnumerable<Order>>
+        +GetByDateRangeAsync(startDate, endDate): Task<IEnumerable<Order>>
+    }
+}
+
+' Controllers
+package "Controllers" {
+    class ProductsController {
+        -_productRepository: IProductRepository
+        -_mapper: IMapper
+        +ProductsController(repository, mapper)
+        +GetProducts(): Task<ActionResult<IEnumerable<ProductView>>>
+        +GetProduct(id: string): Task<ActionResult<ProductView>>
+        +GetProductByCode(code: string): Task<ActionResult<ProductView>>
+        +GetProductByName(name: string): Task<ActionResult<ProductView>>
+        +GetProductsByPriceRange(minPrice, maxPrice): Task<ActionResult<IEnumerable<ProductView>>>
+        +GetLowStockProducts(threshold): Task<ActionResult<IEnumerable<ProductView>>>
+        +CreateProduct(view: CreateProductView): Task<ActionResult<ProductView>>
+        +UpdateProduct(id: string, view: UpdateProductView): Task<IActionResult>
+        +DeleteProduct(id: string): Task<IActionResult>
+    }
+
+    class CustomersController {
+        -_customerRepository: ICustomerRepository
+        -_mapper: IMapper
+        +CustomersController(repository, mapper)
+        +GetCustomers(): Task<ActionResult<IEnumerable<CustomerView>>>
+        +GetCustomer(id: string): Task<ActionResult<CustomerView>>
+        +CreateCustomer(view: CreateCustomerView): Task<ActionResult<CustomerView>>
+        +UpdateCustomer(id: string, view: UpdateCustomerView): Task<IActionResult>
+        +DeleteCustomer(id: string): Task<IActionResult>
+    }
+
+    class OrdersController {
+        -_orderRepository: IOrderRepository
+        -_customerRepository: ICustomerRepository
+        -_productRepository: IProductRepository
+        -_mapper: IMapper
+        +OrdersController(orderRepo, customerRepo, productRepo, mapper)
+        +GetOrders(): Task<ActionResult<IEnumerable<OrderView>>>
+        +GetOrder(id: string): Task<ActionResult<OrderView>>
+        +GetOrdersByCustomer(customerId: string): Task<ActionResult<IEnumerable<OrderView>>>
+        +GetOrdersByStatus(status: OrderStatus): Task<ActionResult<IEnumerable<OrderView>>>
+        +CreateOrder(view: CreateOrderView): Task<ActionResult<OrderView>>
+        +UpdateOrder(id: string, view: UpdateOrderView): Task<IActionResult>
+        +DeleteOrder(id: string): Task<IActionResult>
+    }
+}
+
+' Data Context
+package "Data" {
+    class DevShopDbContext {
+        +Customers: DbSet<Customer>
+        +Products: DbSet<Product>
+        +Orders: DbSet<Order>
+        +OrderItems: DbSet<OrderItem>
+        +DevShopDbContext(options)
+        +OnModelCreating(modelBuilder)
+        +SaveChanges()
+        +SaveChangesAsync()
+        -UpdateTimestamps()
+    }
+}
+
+' Mappings
+package "Mappings" {
+    class AutoMapperProfile {
+        +AutoMapperProfile()
+    }
+}
+
+' Relacionamentos - Entidades
+Entity <|-- Customer
+Entity <|-- Product
+Entity <|-- Order
+Entity <|-- OrderItem
+
+Customer ||--o{ Order : has
+Order ||--o{ OrderItem : contains
+OrderItem }o--|| Product : references
+Order }o--|| Customer : belongs to
+
+' Relacionamentos - Repositórios
+IRepository <|.. Repository
+IRepository <|-- IProductRepository
+IRepository <|-- ICustomerRepository
+IRepository <|-- IOrderRepository
+
+Repository <|-- ProductRepository
+Repository <|-- CustomerRepository
+Repository <|-- OrderRepository
+
+IProductRepository <|.. ProductRepository
+ICustomerRepository <|.. CustomerRepository
+IOrderRepository <|.. OrderRepository
+
+' Relacionamentos - Controllers
+ProductsController --> IProductRepository : uses
+ProductsController --> AutoMapperProfile : uses
+CustomersController --> ICustomerRepository : uses
+CustomersController --> AutoMapperProfile : uses
+OrdersController --> IOrderRepository : uses
+OrdersController --> ICustomerRepository : uses
+OrdersController --> IProductRepository : uses
+OrdersController --> AutoMapperProfile : uses
+
+' Relacionamentos - Data Context
+ProductRepository --> DevShopDbContext : uses
+CustomerRepository --> DevShopDbContext : uses
+OrderRepository --> DevShopDbContext : uses
+
+' Relacionamentos - Mappings
+AutoMapperProfile --> ProductView : maps
+AutoMapperProfile --> CreateProductView : maps
+AutoMapperProfile --> UpdateProductView : maps
+AutoMapperProfile --> CustomerView : maps
+AutoMapperProfile --> CreateCustomerView : maps
+AutoMapperProfile --> UpdateCustomerView : maps
+AutoMapperProfile --> OrderView : maps
+AutoMapperProfile --> CreateOrderView : maps
+AutoMapperProfile --> UpdateOrderView : maps
+AutoMapperProfile --> OrderItemView : maps
+AutoMapperProfile --> CreateOrderItemView : maps
+AutoMapperProfile --> UpdateOrderItemView : maps
+
+@enduml 
