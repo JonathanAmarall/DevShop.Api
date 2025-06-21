@@ -2,116 +2,6 @@
 
 API de e-commerce desenvolvida com ASP.NET Core 9.0 e Entity Framework Core com SQLite.
 
-## 📊 Diagramas de Arquitetura
-
-A documentação de arquitetura está disponível em [`Documentation/Architecture/`](DevShop.Api/Documentation/Architecture/):
-
-### Diagramas Disponíveis
-
-#### 1. **Diagrama de Classes UML** 
-- **Arquivo**: [`ClassDiagram.puml`](DevShop.Api/Documentation/Architecture/ClassDiagram.puml) / [`ClassDiagram.md`](DevShop.Api/Documentation/Architecture/ClassDiagram.md)
-- **Descrição**: Mostra as entidades, Views, Repositórios e suas relações
-- **Nível**: Detalhado - Classes e métodos
-
-#### 2. **Diagrama C4 Container (Nível 1)**
-- **Arquivo**: [`C4-Container.puml`](DevShop.Api/Documentation/Architecture/C4-Container.puml) / [`C4-Container.md`](DevShop.Api/Documentation/Architecture/C4-Container.md)
-- **Descrição**: Visão geral do sistema e suas dependências
-- **Nível**: Alto - Containers e tecnologias
-
-#### 3. **Diagrama C4 Component (Nível 2)**
-- **Arquivo**: [`C4-Component.puml`](DevShop.Api/Documentation/Architecture/C4-Component.puml) / [`C4-Component.md`](DevShop.Api/Documentation/Architecture/C4-Component.md)
-- **Descrição**: Mostra os componentes principais da aplicação
-- **Nível**: Médio - Componentes e suas responsabilidades
-
-#### 4. **Diagrama de Sequência**
-- **Arquivo**: [`SequenceDiagram.puml`](DevShop.Api/Documentation/Architecture/SequenceDiagram.puml) / [`SequenceDiagram.md`](DevShop.Api/Documentation/Architecture/SequenceDiagram.md)
-- **Descrição**: Fluxo de criação de um pedido
-- **Nível**: Detalhado - Interações entre componentes
-
-### Como Visualizar
-
-#### PlantUML
-1. Instale uma extensão PlantUML no seu editor (VS Code, IntelliJ, etc.)
-2. Abra qualquer arquivo `.puml`
-3. Use `Alt+Shift+D` (VS Code) para visualizar
-
-#### PlantUML Online
-1. Acesse: https://www.plantuml.com/plantuml/uml/
-2. Cole o conteúdo do arquivo `.puml`
-3. O diagrama será gerado automaticamente
-
-#### Mermaid (GitHub)
-Os diagramas também estão disponíveis em formato Mermaid para visualização direta no GitHub nos arquivos `.md`.
-
-## Configuração do Banco de Dados
-
-O projeto está configurado para usar SQLite como banco de dados. O arquivo do banco será criado automaticamente na primeira execução.
-
-### Estrutura das Entidades
-
-- **Customer**: Clientes com nome, telefone e endereço
-- **Product**: Produtos com nome, descrição, preço, quantidade e código único
-- **Order**: Pedidos com cliente, data, valor total e status
-- **OrderItem**: Itens dos pedidos com produto, quantidade e preço unitário
-
-### Configurações do Entity Framework
-
-O `DevShopDbContext` está configurado com:
-
-- Relacionamentos entre entidades
-- Configurações de chaves primárias e estrangeiras
-- Índices para otimização de consultas
-- Atualização automática de timestamps (CreateOnUtc e UpdateOnUtc)
-
-### Padrão Repository
-
-O projeto implementa o padrão Repository para abstrair o acesso a dados:
-
-#### Interfaces de Repositório:
-- **IRepository<T>**: Interface genérica com operações básicas (CRUD)
-- **IProductRepository**: Repositório específico para produtos com métodos customizados
-- **ICustomerRepository**: Repositório específico para clientes com métodos customizados
-- **IOrderRepository**: Repositório específico para pedidos com métodos customizados
-
-#### Implementações:
-- **Repository<T>**: Implementação base genérica
-- **ProductRepository**: Implementação específica para produtos
-- **CustomerRepository**: Implementação específica para clientes
-- **OrderRepository**: Implementação específica para pedidos
-
-#### Benefícios:
-- Abstração do acesso a dados
-- Facilita testes unitários
-- Centraliza lógica de acesso a dados
-- Permite troca fácil de implementação de banco
-
-### Views e AutoMapper
-
-O projeto utiliza Views (Data Transfer Objects) para separar a camada de apresentação das entidades de domínio:
-
-#### Views Disponíveis:
-- **ProductView**: Para retorno de dados de produtos
-- **CreateProductView**: Para criação de produtos
-- **UpdateProductView**: Para atualização de produtos
-- **CustomerView**: Para retorno de dados de clientes
-- **CreateCustomerView**: Para criação de clientes
-- **UpdateCustomerView**: Para atualização de clientes
-- **OrderView**: Para retorno de dados de pedidos
-- **CreateOrderView**: Para criação de pedidos
-- **UpdateOrderView**: Para atualização de pedidos
-- **OrderItemView**: Para retorno de dados de itens de pedido
-- **CreateOrderItemView**: Para criação de itens de pedido
-- **UpdateOrderItemView**: Para atualização de itens de pedido
-
-#### AutoMapper:
-- Configurado automaticamente no `Program.cs`
-- Mapeamentos definidos em `Mappings/AutoMapperProfile.cs`
-- Conversão automática entre entidades e Views
-
-### Migrações
-
-O projeto inclui uma migração inicial que cria todas as tabelas necessárias. A migração é aplicada automaticamente na inicialização da aplicação.
-
 ### Dados Iniciais
 
 O sistema inclui dados de exemplo para produtos que são inseridos automaticamente na primeira execução.
@@ -256,7 +146,113 @@ GET /api/products/low-stock?threshold=5
 GET /api/orders/status/Pending
 ```
 
-#### Pedidos por período
-```
-GET /api/orders/date-range?startDate=2024-01-01&endDate=2024-12-31
-```
+## Configuração do Banco de Dados
+
+O projeto está configurado para usar SQLite como banco de dados. O arquivo do banco será criado automaticamente na primeira execução.
+
+### Estrutura das Entidades
+
+- **Customer**: Clientes com nome, telefone e endereço
+- **Product**: Produtos com nome, descrição, preço, quantidade e código único
+- **Order**: Pedidos com cliente, data, valor total e status
+- **OrderItem**: Itens dos pedidos com produto, quantidade e preço unitário
+
+### Configurações do Entity Framework
+
+O `DevShopDbContext` está configurado com:
+
+- Relacionamentos entre entidades
+- Configurações de chaves primárias e estrangeiras
+- Índices para otimização de consultas
+- Atualização automática de timestamps (CreateOnUtc e UpdateOnUtc)
+
+### Padrão Repository
+
+O projeto implementa o padrão Repository para abstrair o acesso a dados:
+
+#### Interfaces de Repositório:
+- **IRepository<T>**: Interface genérica com operações básicas (CRUD)
+- **IProductRepository**: Repositório específico para produtos com métodos customizados
+- **ICustomerRepository**: Repositório específico para clientes com métodos customizados
+- **IOrderRepository**: Repositório específico para pedidos com métodos customizados
+
+#### Implementações:
+- **Repository<T>**: Implementação base genérica
+- **ProductRepository**: Implementação específica para produtos
+- **CustomerRepository**: Implementação específica para clientes
+- **OrderRepository**: Implementação específica para pedidos
+
+#### Benefícios:
+- Abstração do acesso a dados
+- Facilita testes unitários
+- Centraliza lógica de acesso a dados
+- Permite troca fácil de implementação de banco
+
+### Views e AutoMapper
+
+O projeto utiliza Views (Data Transfer Objects) para separar a camada de apresentação das entidades de domínio:
+
+#### Views Disponíveis:
+- **ProductView**: Para retorno de dados de produtos
+- **CreateProductView**: Para criação de produtos
+- **UpdateProductView**: Para atualização de produtos
+- **CustomerView**: Para retorno de dados de clientes
+- **CreateCustomerView**: Para criação de clientes
+- **UpdateCustomerView**: Para atualização de clientes
+- **OrderView**: Para retorno de dados de pedidos
+- **CreateOrderView**: Para criação de pedidos
+- **UpdateOrderView**: Para atualização de pedidos
+- **OrderItemView**: Para retorno de dados de itens de pedido
+- **CreateOrderItemView**: Para criação de itens de pedido
+- **UpdateOrderItemView**: Para atualização de itens de pedido
+
+#### AutoMapper:
+- Configurado automaticamente no `Program.cs`
+- Mapeamentos definidos em `Mappings/AutoMapperProfile.cs`
+- Conversão automática entre entidades e Views
+
+### Migrações
+
+O projeto inclui uma migração inicial que cria todas as tabelas necessárias. A migração é aplicada automaticamente na inicialização da aplicação.
+
+
+## 📊 Diagramas de Arquitetura
+
+A documentação de arquitetura está disponível em [`Documentation/Architecture/`](DevShop.Api/Documentation/Architecture/):
+
+### Diagramas Disponíveis
+
+#### 1. **Diagrama de Classes UML** 
+- **Arquivo**: [`ClassDiagram.puml`](DevShop.Api/Documentation/Architecture/ClassDiagram.puml) / [`ClassDiagram.md`](DevShop.Api/Documentation/Architecture/ClassDiagram.md)
+- **Descrição**: Mostra as entidades, Views, Repositórios e suas relações
+- **Nível**: Detalhado - Classes e métodos
+
+#### 2. **Diagrama C4 Container (Nível 1)**
+- **Arquivo**: [`C4-Container.puml`](DevShop.Api/Documentation/Architecture/C4-Container.puml) / [`C4-Container.md`](DevShop.Api/Documentation/Architecture/C4-Container.md)
+- **Descrição**: Visão geral do sistema e suas dependências
+- **Nível**: Alto - Containers e tecnologias
+
+#### 3. **Diagrama C4 Component (Nível 2)**
+- **Arquivo**: [`C4-Component.puml`](DevShop.Api/Documentation/Architecture/C4-Component.puml) / [`C4-Component.md`](DevShop.Api/Documentation/Architecture/C4-Component.md)
+- **Descrição**: Mostra os componentes principais da aplicação
+- **Nível**: Médio - Componentes e suas responsabilidades
+
+#### 4. **Diagrama de Sequência**
+- **Arquivo**: [`SequenceDiagram.puml`](DevShop.Api/Documentation/Architecture/SequenceDiagram.puml) / [`SequenceDiagram.md`](DevShop.Api/Documentation/Architecture/SequenceDiagram.md)
+- **Descrição**: Fluxo de criação de um pedido
+- **Nível**: Detalhado - Interações entre componentes
+
+### Como Visualizar
+
+#### PlantUML
+1. Instale uma extensão PlantUML no seu editor (VS Code, IntelliJ, etc.)
+2. Abra qualquer arquivo `.puml`
+3. Use `Alt+Shift+D` (VS Code) para visualizar
+
+#### PlantUML Online
+1. Acesse: https://www.plantuml.com/plantuml/uml/
+2. Cole o conteúdo do arquivo `.puml`
+3. O diagrama será gerado automaticamente
+
+#### Mermaid (GitHub)
+Os diagramas também estão disponíveis em formato Mermaid para visualização direta no GitHub nos arquivos `.md`.
